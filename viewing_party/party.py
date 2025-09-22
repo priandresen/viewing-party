@@ -24,6 +24,7 @@ def watch_movie(user_data, title):
             user_data["watchlist"].remove(movie)
             user_data["watched"].append(movie)
 
+
     return user_data
 
 # -----------------------------------------
