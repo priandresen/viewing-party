@@ -38,7 +38,11 @@ def get_watched_avg_rating(user_data):
     for movie in user_data["watched"]:
         avg_rating += movie["rating"]
 
-    return avg_rating / len(user_data["watched"])
+    return avg_rating / len(user_data["watched"]
+
+
+
+
 
 
 """Create a function named `get_most_watched_genre`. This function should...
@@ -68,6 +72,8 @@ def get_most_watched_genre(user_data):
 # -----------------------------------------
 # ------------- WAVE 3 --------------------
 # -----------------------------------------
+
+def get_unique_watched(user_data):
 
         
 # -----------------------------------------
