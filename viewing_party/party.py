@@ -75,42 +75,42 @@ def get_most_watched_genre(user_data):
 
 
 def get_unique_watched(user_data):
-
+    # Create two sets to store movie titles: all movies friends have watched and all movies the user has watched
     friends_set = set()
     user_set = set()
-    
+    # Loop through each friend and add their watched movie titles to friends_set
     for friend in user_data["friends"]:
         for friend_movie in friend["watched"]:
             friends_set.add(friend_movie["title"])
-
+    # Loop through the user's watched movies and add their titles to user_set
     for user_movie in user_data["watched"]:
         user_set.add(user_movie["title"])
-
+    # Find movies that the user has watched but friends haven't
     unique_title = user_set - friends_set
-
+    # Create a list of movie dictionaries for those unique titles
     unique_movies = []
 
     for movie in user_data["watched"]:
         if movie["title"] in unique_title:
             unique_movies.append(movie)
-
+    # Return the list of unique movies
     return unique_movies
 
 
 def get_friends_unique_watched(user_data):
-
+    # Create two sets: all movies friends have watched and all movies the user has watched
     friends_set = set()
     user_set = set()
-    
+    # Add all movie titles that friends have watched to friends_set
     for friend in user_data["friends"]:
         for friend_movie in friend["watched"]:
             friends_set.add(friend_movie["title"])
     
-
+    # Add all movie titles that the user has watched to user_set
     for user_movie in user_data["watched"]:
         user_set.add(user_movie["title"])
     print(user_set)
-
+    # Find movies that friends have watched but the user has NOT watched
     unique_title = friends_set - user_set
     print(unique_title)
 
@@ -131,6 +131,21 @@ def get_friends_unique_watched(user_data):
 # -----------------------------------------
 # ------------- WAVE 4 --------------------
 # -----------------------------------------
+
+    """- take one parameter: `user_data`
+  - `user_data` will have a field `"subscriptions"`. The value of `"subscriptions"`
+    is a list of strings
+    - This represents the names of streaming services that the user has access to
+    - Each friend in `"friends"` has a watched list. Each movie in the watched 
+    list has a `"host"`, which is a string that says what streaming service it's 
+    hosted on
+- Determine a list of recommended movies. A movie should be added to this list if 
+and only if:
+  - The user has not watched it
+  - At least one of the user's friends has watched
+  - The `"host"` of the movie is a service that is in the user's `"subscriptions"`
+- Return the list of recommended movies"""
+
 
 def get_available_recs(user_data):
     # Create a set with the services the user is subscribed to
@@ -172,24 +187,6 @@ def get_available_recs(user_data):
                 seen_movies.add(movie_key)
 
     return recommendations
-
-
-
-    """- take one parameter: `user_data`
-  - `user_data` will have a field `"subscriptions"`. The value of `"subscriptions"`
-    is a list of strings
-    - This represents the names of streaming services that the user has access to
-    - Each friend in `"friends"` has a watched list. Each movie in the watched 
-    list has a `"host"`, which is a string that says what streaming service it's 
-    hosted on
-- Determine a list of recommended movies. A movie should be added to this list if 
-and only if:
-  - The user has not watched it
-  - At least one of the user's friends has watched
-  - The `"host"` of the movie is a service that is in the user's `"subscriptions"`
-- Return the list of recommended movies"""
-
-
 
 
 # -----------------------------------------
