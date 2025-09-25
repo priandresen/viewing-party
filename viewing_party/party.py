@@ -118,7 +118,7 @@ def get_friends_unique_watched(user_data):
 
     for movie in user_data["friends"]:
         for friend_movie in movie["watched"]:
-            ## here we are checking the movie that the friend has watched
+            # here we are checking the movie that the friend has watched
             if friend_movie["title"] in unique_title and (friend_movie not in unique_movies):
                 #checking for duplicates
                 unique_movies.append(friend_movie)
@@ -133,57 +133,46 @@ def get_friends_unique_watched(user_data):
 # -----------------------------------------
 
 def get_available_recs(user_data):
+    # Create a set with the services the user is subscribed to
+    subscriptions = set()
+    for service in user_data["subscriptions"]:
+        subscriptions.add(service)
 
-    watched = user_data.get("watched", [])
-    friends = user_data.get("friends", [])
-    subscriptions = user_data.get("subscriptions", [])
-
-    # set of EXACT movies the user has already watched (title, genre, rating, host)
+    # Create a set with the EXACT movies the user has already watched
     user_watched_exact = set()
-    i = 0
-    while i < len(watched):
-        m = watched[i]
-        user_watched_exact.add((
-            m.get("title"),
-            m.get("genre"),
-            m.get("rating"),
-            m.get("host"),
-        ))
-        i += 1
+    for movie in user_data["watched"]:
+        # Here we take the four values directly with []
+        title = movie["title"]
+        genre = movie["genre"]
+        rating = movie["rating"]
+        host = movie["host"]
 
-    # set of available services
-    subs_set = set()
-    j = 0
-    while j < len(subscriptions):
-        subs_set.add(subscriptions[j])
-        j += 1
+        user_watched_exact.add((title, genre, rating, host))
 
-    # recommendations without duplicates
-    recs = []
-    seen_exact = set()  # avoid repeating the SAME movie from a friend
+    # Final list of recommendations and set to avoid duplicates
+    recommendations = []
+    seen_movies = set()
 
-    f = 0
-    while f < len(friends):
-        fw = friends[f].get("watched", [])
-        k = 0
-        while k < len(fw):
-            movie = fw[k]
-            movie_key = (
-                movie.get("title"),
-                movie.get("genre"),
-                movie.get("rating"),
-                movie.get("host"),
-            )
-            host = movie.get("host")
+    # 4. Check the movies that the friends have watched
+    for friend in user_data["friends"]:
+        for movie in friend["watched"]:
+            title = movie["title"]
+            genre = movie["genre"]
+            rating = movie["rating"]
+            host = movie["host"]
 
-            if (movie_key not in user_watched_exact) and (host in subs_set) and (movie_key not in seen_exact):
-                recs.append(movie)
-                seen_exact.add(movie_key)
+            movie_key = (title, genre, rating, host)
 
-            k += 1
-        f += 1
+            # Add only if:
+            # - the user has NOT watched it
+            # - the host is in the user's subscriptions
+            # - it has NOT been added before
+            if movie_key not in user_watched_exact and host in subscriptions and movie_key not in seen_movies:
+                recommendations.append(movie)
+                seen_movies.add(movie_key)
 
-    return recs
+    return recommendations
+
 
 
     """- take one parameter: `user_data`
@@ -216,64 +205,49 @@ recommended movies. A movie should be added to this list if and only if:
 - Return the list of recommended movies
 """
 def get_new_rec_by_genre(user_data):
-    # 1) find the user's most watched genre
-    watched = user_data.get("watched", [])
-    if not watched:
+    # Get the list of movies the user has watched
+    watched = user_data["watched"]
+    if len(watched) == 0:
         return []
 
-    genre_freq = {}
-    i = 0
-    while i < len(watched):
-        g = watched[i].get("genre")
-        if g is not None:
-            if g in genre_freq:
-                genre_freq[g] += 1
-            else:
-                genre_freq[g] = 1
-        i += 1
+    # Count how many times each genre appears
+    genre_count = {}
+    for movie in watched:
+        genre = movie["genre"]
+        if genre in genre_count:
+            genre_count[genre] += 1
+        else:
+            genre_count[genre] = 1
 
-    if not genre_freq:
-        return []
-
-    # manually find the most frequent genre (without using max)
+    # Find the most watched genre
     top_genre = None
-    top_count = -1
-    for g in genre_freq:
-        if genre_freq[g] > top_count:
-            top_count = genre_freq[g]
-            top_genre = g
+    top_count = 0
+    for genre in genre_count:
+        if genre_count[genre] > top_count:
+            top_genre = genre
+            top_count = genre_count[genre]
 
-    # 3) recommendations from friends with the favorite genre
+    # Get all titles the user has already watched
     user_titles = set()
-    i = 0
-    while i < len(watched):
-        user_titles.add(watched[i].get("title"))
-        i += 1
+    for movie in watched:
+        user_titles.add(movie["title"])
 
-    # 3) recomendações vindas dos amigos com o gênero favorito
+    # Find friends' movies that match the top genre
     recs = []
     seen_titles = set()
-    friends = user_data.get("friends", [])
-
-    f = 0
-    while f < len(friends):
-        fw = friends[f].get("watched", [])
-        j = 0
-        while j < len(fw):
-            movie = fw[j]
-            title = movie.get("title")
-            genre = movie.get("genre")
+    for friend in user_data["friends"]:
+        for movie in friend["watched"]:
+            title = movie["title"]
             if (
-                genre == top_genre
-                and title not in user_titles
-                and title not in seen_titles
+                movie["genre"] == top_genre and
+                title not in user_titles and
+                title not in seen_titles
             ):
                 recs.append(movie)
                 seen_titles.add(title)
-            j += 1
-        f += 1
 
     return recs
+
 
     """
     - take one parameter: `user_data`
@@ -287,29 +261,21 @@ if and only if:
 - Return the list of recommended movies
     """
 def get_rec_from_favorites(user_data):
-    favorites = user_data.get("favorites", [])
-    friends = user_data.get("friends", [])
+    # Get user's favorite movies and friends list
+    favorites = user_data["favorites"]
+    friends = user_data["friends"]
 
-    # collect all titles that any friend has watched
+    # Collect all movie titles that friends have watched
     friends_titles = set()
-    f = 0
-    while f < len(friends):
-        fw = friends[f].get("watched", [])
-        j = 0
-        while j < len(fw):
-            friends_titles.add(fw[j].get("title"))
-            j += 1
-        f += 1
+    for friend in friends:
+        for movie in friend["watched"]:
+            friends_titles.add(movie["title"])
 
-    # recommend only those from favorites that none of the friends have watched
+    # Recommend favorite movies that none of the friends have watched
     recs = []
-    i = 0
-    while i < len(favorites):
-        movie = favorites[i]
-        title = movie.get("title")
-        if title not in friends_titles:
+    for movie in favorites:
+        if movie["title"] not in friends_titles:
             recs.append(movie)
-        i += 1
 
     return recs
 
