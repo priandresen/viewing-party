@@ -96,7 +96,6 @@ def get_unique_watched(user_data):
     # Return the list of unique movies
     return unique_movies
 
-
 def get_friends_unique_watched(user_data):
     # Create two sets: all movies friends have watched and all movies the user has watched
     friends_set = set()
@@ -146,8 +145,12 @@ and only if:
   - The `"host"` of the movie is a service that is in the user's `"subscriptions"`
 - Return the list of recommended movies"""
 
+# -----------------------------------------
+# ------------- WAVE 4 --------------------
+# -----------------------------------------
 
 def get_available_recs(user_data):
+
     # Create a set with the services the user is subscribed to
     subscriptions = set()
     for service in user_data["subscriptions"]:
@@ -167,6 +170,7 @@ def get_available_recs(user_data):
     # Final list of recommendations and set to avoid duplicates
     recommendations = []
     seen_movies = set()
+
 
     # 4. Check the movies that the friends have watched
     for friend in user_data["friends"]:
@@ -189,6 +193,7 @@ def get_available_recs(user_data):
     return recommendations
 
 
+
 # -----------------------------------------
 # ------------- WAVE 5 --------------------
 # -----------------------------------------
@@ -201,6 +206,11 @@ recommended movies. A movie should be added to this list if and only if:
   - The `"genre"` of the movie is the same as the user's most frequent genre
 - Return the list of recommended movies
 """
+
+# -----------------------------------------
+# ------------- WAVE 5 --------------------
+# -----------------------------------------
+
 def get_new_rec_by_genre(user_data):
     # Get the list of movies the user has watched
     watched = user_data["watched"]
@@ -257,6 +267,7 @@ if and only if:
   - None of the user's friends have watched it
 - Return the list of recommended movies
     """
+
 def get_rec_from_favorites(user_data):
     # Get user's favorite movies and friends list
     favorites = user_data["favorites"]
