@@ -1,9 +1,10 @@
 # ------------- WAVE 1 --------------------
 
 def create_movie(title, genre, rating):
+    # If any of the required fields is missing or falsy, return None
     if not title or not genre or not rating:
         return None
-
+    # Return a movie dictionary with the expected keys
     return {
         "title": title,
         "genre": genre,
@@ -11,14 +12,17 @@ def create_movie(title, genre, rating):
     }
 
 def add_to_watched(user_data, movie):
+    # Assumes user_data already has a "watched" key that is a list
     user_data["watched"].append(movie)
     return user_data
 
 def add_to_watchlist(user_data, movie):
+    # Assumes user_data already has a "watchlist" key that is a list
     user_data["watchlist"].append(movie)
     return user_data
 
 def watch_movie(user_data, title):
+    # Look through the watchlist for a movie with the matching title
     for movie in user_data["watchlist"]:
         if movie["title"] == title:
             user_data["watchlist"].remove(movie)
@@ -32,16 +36,15 @@ def watch_movie(user_data, title):
 
 
 def get_watched_avg_rating(user_data):
-
-
+    # Initialize the running total of ratings as a float
     avg_rating = 0.0
 
     if len(user_data["watched"]) == 0:
         return avg_rating
-    
+    # Accumulate the rating of each watched movie
     for movie in user_data["watched"]:
         avg_rating += movie["rating"]
-
+    # Total of ratings divided by the number of watched movies
     return avg_rating / len(user_data["watched"])
 
 def get_most_watched_genre(user_data):
@@ -116,8 +119,7 @@ def get_friends_unique_watched(user_data):
     for movie in user_data["friends"]:
         for friend_movie in movie["watched"]:
             ## here we are checking the movie that the friend has watched
-            if friend_movie["title"] in unique_title and (friend_movie 
-                                                          not in unique_movies):
+            if friend_movie["title"] in unique_title and (friend_movie not in unique_movies):
                 #checking for duplicates
                 unique_movies.append(friend_movie)
     
@@ -131,12 +133,12 @@ def get_friends_unique_watched(user_data):
 # -----------------------------------------
 
 def get_available_recs(user_data):
-    # Bases
+
     watched = user_data.get("watched", [])
     friends = user_data.get("friends", [])
     subscriptions = user_data.get("subscriptions", [])
 
-    # Conjunto de filmes EXATOS que o usuário já viu (title, genre, rating, host)
+    # set of EXACT movies the user has already watched (title, genre, rating, host)
     user_watched_exact = set()
     i = 0
     while i < len(watched):
@@ -149,16 +151,16 @@ def get_available_recs(user_data):
         ))
         i += 1
 
-    # Conjunto de serviços disponíveis
+    # set of available services
     subs_set = set()
     j = 0
     while j < len(subscriptions):
         subs_set.add(subscriptions[j])
         j += 1
 
-    # Recomendações sem duplicata
+    # recommendations without duplicates
     recs = []
-    seen_exact = set()  # evita repetir o MESMO filme do amigo
+    seen_exact = set()  # avoid repeating the SAME movie from a friend
 
     f = 0
     while f < len(friends):
@@ -214,7 +216,7 @@ recommended movies. A movie should be added to this list if and only if:
 - Return the list of recommended movies
 """
 def get_new_rec_by_genre(user_data):
-    # 1) descobrir o gênero mais assistido do usuário
+    # 1) find the user's most watched genre
     watched = user_data.get("watched", [])
     if not watched:
         return []
@@ -233,7 +235,7 @@ def get_new_rec_by_genre(user_data):
     if not genre_freq:
         return []
 
-    # encontra manualmente o gênero mais frequente (sem max)
+    # manually find the most frequent genre (without using max)
     top_genre = None
     top_count = -1
     for g in genre_freq:
@@ -241,7 +243,7 @@ def get_new_rec_by_genre(user_data):
             top_count = genre_freq[g]
             top_genre = g
 
-    # 2) títulos que o usuário já viu (para filtrar "não assistiu")
+    # 3) recommendations from friends with the favorite genre
     user_titles = set()
     i = 0
     while i < len(watched):
@@ -288,7 +290,7 @@ def get_rec_from_favorites(user_data):
     favorites = user_data.get("favorites", [])
     friends = user_data.get("friends", [])
 
-    # coletar todos os títulos que qualquer amigo já assistiu
+    # collect all titles that any friend has watched
     friends_titles = set()
     f = 0
     while f < len(friends):
@@ -299,7 +301,7 @@ def get_rec_from_favorites(user_data):
             j += 1
         f += 1
 
-    # recomendar dos favoritos apenas os que nenhum amigo viu
+    # recommend only those from favorites that none of the friends have watched
     recs = []
     i = 0
     while i < len(favorites):
