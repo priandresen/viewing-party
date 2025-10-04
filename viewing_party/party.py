@@ -78,15 +78,19 @@ def get_unique_watched(user_data):
     # Create two sets to store movie titles: all movies friends have watched and all movies the user has watched
     friends_set = set()
     user_set = set()
+
     # Loop through each friend and add their watched movie titles to friends_set
     for friend in user_data["friends"]:
         for friend_movie in friend["watched"]:
             friends_set.add(friend_movie["title"])
+
     # Loop through the user's watched movies and add their titles to user_set
     for user_movie in user_data["watched"]:
         user_set.add(user_movie["title"])
+
     # Find movies that the user has watched but friends haven't
     unique_title = user_set - friends_set
+    
     # Create a list of movie dictionaries for those unique titles
     unique_movies = []
 
